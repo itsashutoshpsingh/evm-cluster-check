@@ -76,11 +76,13 @@ def h(x):
 def tx_rows(block):
     ts = h(block["timestamp"])
     n = h(block["number"])
+    miner = block["miner"].lower()
     for t in block["transactions"]:
         auth = t.get("authorizationList") or []
         yield {
             "block": n,
             "ts": ts,
+            "miner": miner,
             "hash": t["hash"],
             "tx_index": h(t["transactionIndex"]),
             "nonce": h(t["nonce"]),
