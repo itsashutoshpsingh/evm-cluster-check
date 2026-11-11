@@ -1,0 +1,52 @@
+{
+  "commit": "02aeae14d3696810f01a16bd8b66666ea2871e4f",
+  "fetched_utc": "2026-11-11T23:17:18+00:00",
+  "overlapping_addresses_dropped": 0,
+  "exchanges": {
+    "OKX": {
+      "url": "https://raw.githubusercontent.com/DefiLlama/DefiLlama-Adapters/02aeae14d3696810f01a16bd8b66666ea2871e4f/projects/okex/index.js",
+      "n_addresses": 238,
+      "sha256_of_sorted_list": "6acf5aeea4816f623cb600bf9fff6f1961958c40520e3166206caf57c8291ade"
+    },
+    "Bitfinex": {
+      "url": "https://raw.githubusercontent.com/DefiLlama/DefiLlama-Adapters/02aeae14d3696810f01a16bd8b66666ea2871e4f/projects/bitfinex/index.js",
+      "n_addresses": 4,
+      "sha256_of_sorted_list": "cf683dcdbb2a59cf1c647889bc3210b2123bf71e21cc13404d5f56850e62b9f2"
+    },
+    "KuCoin": {
+      "url": "https://raw.githubusercontent.com/DefiLlama/DefiLlama-Adapters/02aeae14d3696810f01a16bd8b66666ea2871e4f/projects/kucoin/index.js",
+      "n_addresses": 61,
+      "sha256_of_sorted_list": "f33dae31fc6c71120359d373fc807f00d12389b4c7a444960540423d7451f558"
+    },
+    "Gemini": {
+      "url": "https://raw.githubusercontent.com/DefiLlama/DefiLlama-Adapters/02aeae14d3696810f01a16bd8b66666ea2871e4f/projects/gemini/index.js",
+      "n_addresses": 5,
+      "sha256_of_sorted_list": "a4221c915887d5ade241eb768af3d51420580747697a74629a43e6e8f3d8b930"
+    },
+    "HTX": {
+      "url": "https://raw.githubusercontent.com/DefiLlama/DefiLlama-Adapters/02aeae14d3696810f01a16bd8b66666ea2871e4f/projects/huobi/index.js",
+      "n_addresses": 36,
+      "sha256_of_sorted_list": "2ab52c4362687c3e3c90b693938b6ae73d7fc9026e3fe0e0130816cc39362e02"
+    },
+    "Gate": {
+      "url": "https://raw.githubusercontent.com/DefiLlama/DefiLlama-Adapters/02aeae14d3696810f01a16bd8b66666ea2871e4f/projects/gate-io/index.js",
+      "n_addresses": 9,
+      "sha256_of_sorted_list": "86c72504f2eb7edf38ff783d71dfaf4dcd7e46c13ba1450dd3d4eeeed2cc4241"
+    },
+    "CoinEx": {
+      "url": "https://raw.githubusercontent.com/DefiLlama/DefiLlama-Adapters/02aeae14d3696810f01a16bd8b66666ea2871e4f/projects/coinex/index.js",
+      "n_addresses": 14,
+      "sha256_of_sorted_list": "072c49592026fb185007fd055173ff2faabd43a879a2c915f5c6dc632cee86bd"
+    },
+    "Bitrue": {
+      "url": "https://raw.githubusercontent.com/DefiLlama/DefiLlama-Adapters/02aeae14d3696810f01a16bd8b66666ea2871e4f/projects/bitrue-cex/index.js",
+      "n_addresses": 2,
+      "sha256_of_sorted_list": "dfa44a17841b9a9e11db676ebcce53652f132bc13c1a03fc285242819966a85d"
+    },
+    "Bitget": {
+      "url": "https://raw.githubusercontent.com/DefiLlama/DefiLlama-Adapters/02aeae14d3696810f01a16bd8b66666ea2871e4f/projects/bitget/index.js",
+      "n_addresses": 83,
+      "sha256_of_sorted_list": "19ddd7bd41a6c6cbd73c90e52b95c440c5d4dd498df37401d8a90a6958b37814"
+    }
+  }
+}
