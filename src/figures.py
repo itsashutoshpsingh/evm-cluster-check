@@ -49,6 +49,7 @@ def hero(tag):
     ax.set_xticks(x, [NAMES[k] for k in rules], rotation=20, ha="right")
     ax.set_ylabel("pairs of exchange wallets\nfrom two different exchanges, linked")
     ax.set_yscale("symlog", linthresh=10)
+    ax.set_ylim(0, max(10, r.cross_exchange_pairs_linked.max()) * 6)  # headroom for labels under the title
     ax.set_title(f"False merges by rule ({tag}, 3-day window, PoR ground truth)" if tag == "eth" else f"False merges by rule ({tag})")
     ax.legend(frameon=False)
     save(fig, f"false_merges_by_rule_{tag}")
@@ -129,19 +130,23 @@ def bootstrap(tag):
 
 def taint_fig(tag):
     d = pd.read_csv(f"results/taint_{tag}.csv")
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4))
+    seeds = list(dict.fromkeys(d.seeds))
+    fig, axes = plt.subplots(len(seeds), 2, figsize=(11, 3.6 * len(seeds)), squeeze=False)
     cols = {"all_transfers": RED, "no_zero_value": AMBER, "no_poisoning": GREEN, "no_infrastructure": BLUE}
-    for e, col in cols.items():
-        g = d[d.edges == e]
-        axes[0].plot(g.hops, g.tainted_addresses, "o-", color=col, label=e.replace("_", " "))
-        axes[1].plot(g.hops, g.exchange_por_wallets_tainted, "o-", color=col, label=e.replace("_", " "))
-    axes[0].set_yscale("symlog", linthresh=10)
-    axes[0].set_title("addresses within n hops of OFAC list")
-    axes[1].set_title("exchange PoR wallets within n hops")
-    for a in axes:
+    for i, sd in enumerate(seeds):
+        for e, col in cols.items():
+            g = d[(d.seeds == sd) & (d.edges == e)]
+            axes[i, 0].plot(g.hops, g.tainted_addresses, "o-", color=col, label=e.replace("_", " "))
+            axes[i, 1].plot(g.hops, g.exchange_por_wallets_tainted, "o-", color=col, label=e.replace("_", " "))
+        axes[i, 0].set_title(f"addresses within n hops of {sd.replace('_', ' ')}")
+        axes[i, 1].set_title("exchange PoR wallets within n hops")
+        for a in axes[i]:
+            a.set_xticks([1, 2, 3])
+            a.set_yscale("symlog", linthresh=10)
+        axes[i, 0].legend(frameon=False, fontsize=8)
+    for a in axes[-1]:
         a.set_xlabel("hops")
-        a.set_xticks([1, 2, 3])
-    axes[0].legend(frameon=False, fontsize=8)
+    fig.tight_layout()
     save(fig, f"taint_{tag}")
 
 
