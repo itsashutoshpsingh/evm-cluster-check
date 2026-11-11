@@ -154,3 +154,15 @@ def test_metrics_on_known_partition():
 def test_components_drop():
     s = components(pd.DataFrame({"a": ["x", "y"], "b": ["d", "d"]}), drop={"d"})
     assert set(s.index) == {"x", "y"} and s["x"] == s["y"]
+
+
+def test_restrict_matches_recompute():
+    u1, u2, d, ex1, ex2 = A("1"), A("2"), A("d"), A("e"), A("f")
+    t = tr([(1, u1, d, "ETH", "1", 1.0, "eth"), (2, d, ex1, "ETH", "1", 0.999, "eth"),
+            (3, u2, d, "ETH", "1", 2.0, "eth"), (4, d, ex2, "ETH", "1", 1.995, "eth")])
+    full = dar.paths(t, {ex1, ex2})
+    sub = t.iloc[[0, 1, 2, 3]]
+    for exch in ({ex1}, {ex2}, {ex1, ex2}):
+        a = dar.restrict(full, sub.iloc[:2], exch)[["vu", "vd", "ve"]].reset_index(drop=True)
+        b = dar.paths(sub.iloc[:2], exch)[["vu", "vd", "ve"]].reset_index(drop=True)
+        assert a.equals(b)

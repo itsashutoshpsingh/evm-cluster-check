@@ -21,7 +21,7 @@ def hid(a):
 def link_graph(w, tr, exch):
     """Graph of every link the 'all' rule plus naive DAR would use, with what created each link."""
     g = nx.Graph()
-    p = dar.paths(tr, exch)
+    p = w.dar_all if getattr(w, "dar_exch", None) == set(exch) and tr is w.tr else dar.paths(tr, exch)
     for r in p.drop_duplicates(["vu", "vd"]).itertuples():
         g.add_edge(r.vu, r.vd, kind="dar", asset=r.asset, tx=r.tx1, ve=r.ve)
     lk = cospend.links(tr, w.eoas)
