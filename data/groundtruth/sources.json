@@ -1,6 +1,14 @@
 {
   "commit": "02aeae14d3696810f01a16bd8b66666ea2871e4f",
-  "fetched_utc": "2026-11-11T23:17:18+00:00",
+  "verification": {
+    "Bitfinex": {
+      "url": "https://raw.githubusercontent.com/bitfinexcom/pub/83d06bdb5f5a2ce05d5ba2db5a426dd44c9f5128/wallets.txt",
+      "exchange_list": 4,
+      "copied_list": 4,
+      "identical": true
+    }
+  },
+  "fetched_utc": "2026-11-11T23:28:15+00:00",
   "overlapping_addresses_dropped": 0,
   "exchanges": {
     "OKX": {

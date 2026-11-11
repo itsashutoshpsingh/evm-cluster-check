@@ -1,0 +1,23 @@
+{
+  "commit": "02aeae14d3696810f01a16bd8b66666ea2871e4f",
+  "verification": {},
+  "fetched_utc": "2026-11-11T23:28:18+00:00",
+  "overlapping_addresses_dropped": 0,
+  "exchanges": {
+    "OKX": {
+      "url": "https://raw.githubusercontent.com/DefiLlama/DefiLlama-Adapters/02aeae14d3696810f01a16bd8b66666ea2871e4f/projects/okex/index.js",
+      "n_addresses": 4,
+      "sha256_of_sorted_list": "6b8ebf1091403bfd83f820c60161d22902a9b33e031696e87ef9bc23d05e281f"
+    },
+    "KuCoin": {
+      "url": "https://raw.githubusercontent.com/DefiLlama/DefiLlama-Adapters/02aeae14d3696810f01a16bd8b66666ea2871e4f/projects/kucoin/index.js",
+      "n_addresses": 10,
+      "sha256_of_sorted_list": "804db29c5139791922b214fcc0421c0c09d87eef23f42f6db9376236ad3a0ef2"
+    },
+    "Bitget": {
+      "url": "https://raw.githubusercontent.com/DefiLlama/DefiLlama-Adapters/02aeae14d3696810f01a16bd8b66666ea2871e4f/projects/bitget/index.js",
+      "n_addresses": 83,
+      "sha256_of_sorted_list": "19ddd7bd41a6c6cbd73c90e52b95c440c5d4dd498df37401d8a90a6958b37814"
+    }
+  }
+}
