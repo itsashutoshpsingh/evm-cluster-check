@@ -24,16 +24,20 @@ import requests
 PROVIDERS = {
     # 1rpc.io was dropped: its free plan hit a daily usage cap after ~2k calls on 2026-11-11
     "eth": ["https://ethereum-rpc.publicnode.com", "https://eth.drpc.org"],
-    "base": ["https://base-rpc.publicnode.com", "https://mainnet.base.org"],
+    # mainnet.base.org answered "request limit reached" within a few calls on 2026-11-11
+    "base": ["https://base-rpc.publicnode.com"],
     "anvil": ["http://127.0.0.1:8545"],  # local fork used by anvil/inject.py
 }
 # Only some free endpoints serve eth_getLogs for blocks older than ~128 blocks
 # (publicnode asks for a token, 1rpc refuses the method), found on 2026-11-11.
-LOG_PROVIDERS = {"eth": ["https://eth.drpc.org"], "base": ["https://base-rpc.publicnode.com", "https://mainnet.base.org"],
+LOG_PROVIDERS = {"eth": ["https://eth.drpc.org"], "base": ["https://base-rpc.publicnode.com"],
                  "anvil": ["http://127.0.0.1:8545"]}
 TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
 # ERC-4337 UserOperationEvent(bytes32 userOpHash, address sender, address paymaster, uint256 nonce, bool success, uint256 actualGasCost, uint256 actualGasUsed)
 USEROP = "0x49628fd1471006c1482da88028e9ce4dbb080b815c9b0344d39e5a8e6ec1419f"
+# publicnode's free Base endpoint refuses eth_getLogs without an address filter but serves
+# eth_getBlockReceipts, so Base logs come from receipts (which also give tx status)
+RECEIPT_CHAINS = {"base"}
 CHUNK = 100
 LOG_SPAN = 5  # blocks per eth_getLogs call; keeps responses well under provider caps
 RATE = float(os.environ.get("FETCH_RATE", "6"))  # total requests/second across providers
@@ -129,10 +133,19 @@ def fetch_chunk(rpc, lrpc, chain, start, end):
     for b in range(start, end + 1):
         blk = rpc.call("eth_getBlockByNumber", [hex(b), True])
         txs.extend(tx_rows(blk))
-    for b in range(start, end + 1, LOG_SPAN):
-        e = min(end, b + LOG_SPAN - 1)
-        res = lrpc.call("eth_getLogs", [{"fromBlock": hex(b), "toBlock": hex(e), "topics": [[TRANSFER, USEROP]]}])
-        logs.extend(log_rows(res))
+    if chain in RECEIPT_CHAINS:
+        failed = set()
+        for b in range(start, end + 1):
+            for r in lrpc.call("eth_getBlockReceipts", [hex(b)]):
+                if r.get("status") == "0x0":
+                    failed.add(r["transactionHash"])
+                logs.extend(log_rows(g for g in r["logs"] if g["topics"] and g["topics"][0] in (TRANSFER, USEROP)))
+        txs = [t for t in txs if t["hash"] not in failed]  # receipts give status, so drop reverted txs
+    else:
+        for b in range(start, end + 1, LOG_SPAN):
+            e = min(end, b + LOG_SPAN - 1)
+            res = lrpc.call("eth_getLogs", [{"fromBlock": hex(b), "toBlock": hex(e), "topics": [[TRANSFER, USEROP]]}])
+            logs.extend(log_rows(res))
     os.makedirs(f"{out}/txs", exist_ok=True)
     os.makedirs(f"{out}/logs", exist_ok=True)
     # write logs last-but-atomically so a crash never leaves a half chunk that looks complete
