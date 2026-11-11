@@ -1,0 +1,18 @@
+{
+ "0xd4e299a063c257d6bb5a2634148d784f35d00434": "alice",
+ "0x2bda0a39a90495d50c8cfc689ae825c17e4924a0": "alice",
+ "0x2d36b686ae52759be88815c94a36fb83cbc81d3c": "alice",
+ "0xdeae8ea494d3322cee0816dd91b7fa2fc2e41e14": "bob",
+ "0x30aec9f96673eaa44ac6c44a20ff03fc179f97e1": "carol",
+ "0xc4c4a800337317b82ec096e2ba32f9a97c409ee8": "carol",
+ "0x717b0683fe9b6a46db994a7be71e34e60cee1300": "dave",
+ "0x8390ea51c2fd4abeafaf6df61b171cae570bc6a8": "stranger",
+ "0x5bb2a549bf5566333a5e69b0d892ed59940ffed5": "attacker",
+ "0x768ab9c11ef9f4cac031e0fb66f17fe7af827f9b": "bundler",
+ "0x8518d6cad2f933f6417bcfea615fd4aa90613330": "paymaster",
+ "0xf5961745f40a1527f67d3fd43c567c52f29ccf85": "alice",
+ "0xe9cf5e88aae88af6633158d5c82a4a2e2acb4637": "bob",
+ "0x84c87180f56df071772fe3afca89110bb41ab225": "exchange-deposit",
+ "0x0003b5aa5e30e97fcc596bb5d0f3a75255e08d4e": "exchange-1",
+ "0x04f2abb57b53122eb0306418f2220746d06af9fc": "exchange-2"
+}

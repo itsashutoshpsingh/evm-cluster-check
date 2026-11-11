@@ -1,0 +1,11 @@
+{
+ "blocks": [
+  26394953,
+  26394971
+ ],
+ "exch": "0x0003b5aa5e30e97fcc596bb5d0f3a75255e08d4e",
+ "exch2": "0x04f2abb57b53122eb0306418f2220746d06af9fc",
+ "sweeper": "0x7777777777777777777777777777777777777777",
+ "dave_balance_change_wei": 0,
+ "dave_received_wei": 100000000000000000
+}

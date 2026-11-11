@@ -1,0 +1,17 @@
+rule,edges,true_links,false_links,false_link_owner_pairs
+dar_naive,all,1,3,carol~bob; exchange-2~alice
+dar_naive,infra_removed,1,3,carol~bob; exchange-2~alice
+dar_victor,all,1,1,carol~bob
+dar_victor,infra_removed,1,1,carol~bob
+dar_hubfiltered,all,1,1,carol~bob
+dar_hubfiltered,infra_removed,1,1,carol~bob
+funder_naive,all,0,3,alice~carol; exchange-1~alice; exchange-1~carol
+funder_naive,infra_removed,0,3,alice~carol; exchange-1~alice; exchange-1~carol
+funder_hubfiltered,all,0,3,alice~carol; exchange-1~alice; exchange-1~carol
+funder_hubfiltered,infra_removed,0,3,alice~carol; exchange-1~alice; exchange-1~carol
+funder_aa_sponsor,all,0,6,alice~carol; bob~alice; exchange-1~alice; exchange-1~carol; paymaster~alice; paymaster~bob
+funder_aa_sponsor,infra_removed,0,6,alice~carol; bob~alice; exchange-1~alice; exchange-1~carol; paymaster~alice; paymaster~bob
+cospend,all,0,1,alice~bob
+cospend,infra_removed,0,0,
+all,all,1,8,alice~bob; alice~carol; carol~alice; carol~bob; exchange-1~alice; exchange-1~carol
+all,infra_removed,1,4,alice~carol; carol~bob; exchange-1~alice; exchange-1~carol
