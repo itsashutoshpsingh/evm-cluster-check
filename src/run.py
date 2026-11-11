@@ -220,7 +220,9 @@ def main():
     t.to_csv(f"results/taint_{tag}.csv", index=False)
     json.dump(hc, open(f"results/haircut_{tag}.json", "w"), indent=2)
     if a.bootstrap:
-        block_bootstrap(w, labels, B=a.bootstrap).to_csv(f"results/bootstrap_{tag}.csv", index=False)
+        pd.concat([block_bootstrap(w, labels, rule=r, B=b).assign(rule=r)
+                   for r, b in (("dar_naive", a.bootstrap), ("cospend", max(1, a.bootstrap // 2)))]
+                  ).to_csv(f"results/bootstrap_{tag}.csv", index=False)
     if a.chain == "eth" and not a.blocks:
         pd.concat([per_day(w, labels, r, a.days) for r in ("dar_naive", "dar_victor", "all")]).to_csv(f"results/per_day_{tag}.csv", index=False)
     hc, hs = handcheck.run(w, labels)

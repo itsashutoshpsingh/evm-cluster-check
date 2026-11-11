@@ -115,16 +115,21 @@ def bootstrap(tag):
     if not os.path.exists(p):
         return
     d = pd.read_csv(p)
-    lo, hi = np.percentile(d.cross_exchange_pairs_linked, [2.5, 97.5])
-    full = pd.read_csv(f"results/rules_{tag}.csv").query("protocol=='full' and hubs=='included' and rule=='dar_naive'").cross_exchange_pairs_linked.iloc[0]
-    fig, ax = plt.subplots(figsize=(8, 3.8))
-    ax.hist(d.cross_exchange_pairs_linked, bins=30, color=BLUE, alpha=0.85)
-    ax.axvspan(lo, hi, color=GREEN, alpha=0.12, label=f"95% interval {lo:,.0f}-{hi:,.0f}")
-    ax.axvline(full, color=AMBER, lw=2, label=f"full window {full:,.0f}")
-    ax.set_xlabel("cross-exchange pairs linked by naive DAR")
-    ax.set_ylabel("bootstrap samples")
-    ax.set_title(f"Block bootstrap over 6-hour segments (B={len(d)})")
-    ax.legend(frameon=False)
+    rules = list(dict.fromkeys(d.rule))
+    full_all = pd.read_csv(f"results/rules_{tag}.csv").query("protocol=='full' and hubs=='included'").set_index("rule")
+    fig, axes = plt.subplots(1, len(rules), figsize=(6 * len(rules), 3.8), squeeze=False)
+    for ax, rule in zip(axes[0], rules):
+        g = d[d.rule == rule]
+        lo, hi = np.percentile(g.cross_exchange_pairs_linked, [2.5, 97.5])
+        full = full_all.cross_exchange_pairs_linked[rule]
+        ax.hist(g.cross_exchange_pairs_linked, bins=30, color=BLUE, alpha=0.85)
+        ax.axvspan(lo, hi, color=GREEN, alpha=0.12, label=f"95% interval {lo:,.0f}-{hi:,.0f}")
+        ax.axvline(full, color=AMBER, lw=2, label=f"full window {full:,.0f}")
+        ax.set_xlabel(f"cross-exchange pairs linked, {NAMES[rule]}")
+        ax.set_ylabel("bootstrap samples")
+        ax.set_title(f"6-hour block bootstrap (B={len(g)})")
+        ax.legend(frameon=False, fontsize=8)
+    fig.tight_layout()
     save(fig, f"bootstrap_{tag}")
 
 
