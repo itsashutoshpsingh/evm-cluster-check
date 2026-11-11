@@ -10,7 +10,7 @@ import time
 import numpy as np
 import pandas as pd
 
-from src import edges, groundtruth, score, taint
+from src import edges, groundtruth, handcheck, score, taint
 from src.cluster import components
 from src.heuristics import cospend, dar, funder
 from src.infra_labels import label
@@ -172,7 +172,7 @@ def main():
     a = ap.parse_args()
     os.makedirs("results", exist_ok=True)
     tag = a.chain
-    labels = groundtruth.load(fetch=False)
+    labels = groundtruth.load(fetch=False, chain=a.chain)
     sources = taint.ofac_eth("data/raw/ofac/SDN.XML")
     log("loading")
     w = Window(a.chain, a.blocks)
@@ -195,6 +195,10 @@ def main():
         block_bootstrap(w, labels, B=a.bootstrap).to_csv(f"results/bootstrap_{tag}.csv", index=False)
     if a.chain == "eth" and not a.blocks:
         pd.concat([per_day(w, labels, r, a.days) for r in ("dar_naive", "dar_victor", "all")]).to_csv(f"results/per_day_{tag}.csv", index=False)
+    hc, hs = handcheck.run(w, labels)
+    hc.to_csv(f"results/handcheck_{tag}.csv", index=False)
+    json.dump(hs, open(f"results/handcheck_summary_{tag}.json", "w"), indent=2)
+    handcheck.evidence(w, labels).to_csv(f"results/evidence_breakdown_{tag}.csv", index=False)
     log("done")
 
 
