@@ -26,9 +26,8 @@ fetch:  ## ~70 min for Ethereum, ~60 min for Base on free endpoints
 
 run:
 	$(PY) -m src.run --chain eth
+	$(PY) -m src.run --chain base --bootstrap 0
 	$(PY) -m src.reproduce
-	$(PY) -m src.handcheck
-	$(PY) -m src.base_run
 
 injected:  ## needs `anvil --fork-url <rpc> --hardfork prague --port 8545` running
 	$(PY) -m anvil.inject
