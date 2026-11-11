@@ -11,6 +11,7 @@ re-run resumes where it stopped and a rate-limit error can never become missing 
 import argparse
 import datetime as dt
 import itertools
+import json
 import os
 import sys
 import threading
@@ -93,6 +94,8 @@ def tx_rows(block):
             "type": h(t.get("type", "0x0")),
             "selector": (t.get("input") or "0x")[:10],
             "delegates": ",".join(a["address"].lower() for a in auth),
+            # full EIP-7702 tuples so the signing authority can be recovered offline
+            "auth": json.dumps(auth) if auth else "",
         }
 
 
