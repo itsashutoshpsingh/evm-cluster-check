@@ -36,9 +36,6 @@ funder_aa_sponsor,all,bob,alice,False
 funder_aa_sponsor,infra_removed,exchange-1,alice,False
 funder_aa_sponsor,infra_removed,exchange-1,carol,False
 funder_aa_sponsor,infra_removed,alice,carol,False
-funder_aa_sponsor,infra_removed,paymaster,bob,False
-funder_aa_sponsor,infra_removed,paymaster,alice,False
-funder_aa_sponsor,infra_removed,bob,alice,False
 cospend,all,alice,bob,False
 all,all,alice,carol,False
 all,all,alice,alice,True
@@ -49,6 +46,9 @@ all,all,alice,bob,False
 all,all,exchange-1,alice,False
 all,all,exchange-1,carol,False
 all,all,alice,carol,False
+all,all,paymaster,bob,False
+all,all,paymaster,alice,False
+all,all,bob,alice,False
 all,infra_removed,alice,alice,True
 all,infra_removed,carol,bob,False
 all,infra_removed,exchange-1,alice,False

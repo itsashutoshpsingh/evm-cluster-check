@@ -1,0 +1,9 @@
+rule,false_pairs,false_pairs_without_poisoning,share_caused_by_poisoning,false_pairs_without_sweeper,share_caused_by_sweeper,false_pairs_without_aa_bundler_paymaster,share_caused_by_aa_bundler_paymaster,false_pairs_without_all_infrastructure,share_caused_by_all_infrastructure
+dar_naive,12,12,0.0,12,0.0,12,0.0,12,0.0
+dar_victor,0,0,,0,,0,,0,
+dar_hubfiltered,0,0,,0,,0,,0,
+funder_naive,0,0,,0,,0,,0,
+funder_hubfiltered,0,0,,0,,0,,0,
+funder_aa_sponsor,0,0,,0,,0,,0,
+cospend,137,34,0.7518248175182481,137,0.0,137,0.0,34,0.7518248175182481
+all,226,68,0.6991150442477876,226,0.0,226,0.0,68,0.6991150442477876

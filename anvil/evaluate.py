@@ -52,7 +52,7 @@ def main():
     for rule in ["dar_naive", "dar_victor", "dar_hubfiltered", "funder_naive", "funder_hubfiltered", "funder_aa_sponsor", "cospend", "all"]:
         for edges_ in ("all", "infra_removed"):
             tr = w.tr if edges_ == "all" else w.tr[~w.tr.infra_any]
-            s, _, _ = rule_links(w, tr, rule, exch)
+            s, _, _ = rule_links(w, tr, rule, exch, drop_aa=edges_ == "infra_removed")
             pairs = linked_pairs(s)
             tp = [(x, y) for x, y in pairs if OWNERS[x] == OWNERS[y]]
             fp = [(x, y) for x, y in pairs if OWNERS[x] != OWNERS[y]]

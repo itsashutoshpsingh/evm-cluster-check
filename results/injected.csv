@@ -10,8 +10,8 @@ funder_naive,infra_removed,0,3,alice~carol; exchange-1~alice; exchange-1~carol
 funder_hubfiltered,all,0,3,alice~carol; exchange-1~alice; exchange-1~carol
 funder_hubfiltered,infra_removed,0,3,alice~carol; exchange-1~alice; exchange-1~carol
 funder_aa_sponsor,all,0,6,alice~carol; bob~alice; exchange-1~alice; exchange-1~carol; paymaster~alice; paymaster~bob
-funder_aa_sponsor,infra_removed,0,6,alice~carol; bob~alice; exchange-1~alice; exchange-1~carol; paymaster~alice; paymaster~bob
+funder_aa_sponsor,infra_removed,0,3,alice~carol; exchange-1~alice; exchange-1~carol
 cospend,all,0,1,alice~bob
 cospend,infra_removed,0,0,
-all,all,1,8,alice~bob; alice~carol; carol~alice; carol~bob; exchange-1~alice; exchange-1~carol
+all,all,1,11,alice~bob; alice~carol; bob~alice; carol~alice; carol~bob; exchange-1~alice; exchange-1~carol; paymaster~alice; paymaster~bob
 all,infra_removed,1,4,alice~carol; carol~bob; exchange-1~alice; exchange-1~carol
