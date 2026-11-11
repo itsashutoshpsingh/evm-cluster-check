@@ -44,13 +44,24 @@ class Window:
         self.active = set(tr.src) | set(tr.dst)
 
 
+def dar_paths(w, tr, exch):
+    """DAR paths for (tr, exch), computed once on the full window and then restricted."""
+    exch = set(exch)
+    if not hasattr(w, "dar_all") or not exch <= w.dar_exch:
+        w.dar_exch = exch | getattr(w, "dar_exch", set())
+        w.dar_all = dar.paths(w.tr, w.dar_exch)
+    if tr is w.tr and exch == w.dar_exch:
+        return w.dar_all
+    return dar.restrict(w.dar_all, tr, exch)
+
+
 def rule_links(w, tr, rule, exch, drop_aa=False):
     """(clusters, link pairs a,b, addresses dropped after linking) for one rule on transfers `tr`.
 
     drop_aa: also drop links that come from ERC-4337 UserOperation events (sponsor links).
     """
     if rule.startswith("dar_"):
-        p = dar.paths(tr, exch)
+        p = dar_paths(w, tr, exch)
         variant = rule[4:]
         s, deps, used = dar.clusters(p, variant, exch=exch, miners=w.miners)
         return s, used.rename(columns={"vu": "a", "vd": "b"})[["a", "b"]], deps

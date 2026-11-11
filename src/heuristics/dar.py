@@ -44,9 +44,16 @@ def paths(tr, exch, tmax=TMAX, amax=AMAX_ETH):
     m = m[(db >= 0) & (db <= tmax)]
     return pd.DataFrame({
         "vu": m.src_1, "vd": m.dst_1, "ve": m.dst_2, "asset": m.asset,
-        "b1": m.block_1, "b2": m.block_2, "tx1": m.tx_hash_1, "li1": m.log_index_1, "raw1": m.raw_1,
+        "b1": m.block_1, "b2": m.block_2, "tx1": m.tx_hash_1, "li1": m.log_index_1, "tx2": m.tx_hash_2, "li2": m.log_index_2, "raw1": m.raw_1,
         "a1": m.amount_1, "a2": m.amount_2,
     }).drop_duplicates(["vu", "vd", "ve", "tx1", "li1"]).reset_index(drop=True)
+
+
+def restrict(p, tr, exch):
+    """Paths that `paths(tr, exch)` would return, given p = paths(T, E) with tr a subset of T, exch of E."""
+    keep = pd.MultiIndex.from_arrays([tr.tx_hash, tr.log_index])
+    ok = pd.MultiIndex.from_arrays([p.tx1, p.li1]).isin(keep) & pd.MultiIndex.from_arrays([p.tx2, p.li2]).isin(keep)
+    return p[ok & p.ve.isin(exch) & ~p.vd.isin(exch)]
 
 
 def clusters(p, variant="victor", exch=(), miners=(), hub_k=10, max_size=1000):
