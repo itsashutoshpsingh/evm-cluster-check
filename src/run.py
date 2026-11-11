@@ -72,8 +72,8 @@ def rule_links(w, tr, rule, exch, drop_aa=False):
 RULES = ["dar_naive", "dar_victor", "dar_hubfiltered", "funder_naive", "funder_hubfiltered", "funder_aa_sponsor", "cospend", "all"]
 
 
-def evaluate_rules(w, labels_all, splits, seed=0):
-    rows = []
+def evaluate_rules(w, labels_all, splits, seed=0, sizes_out=None):
+    rows, sizes = [], []
     for hubs in ("included", "excluded"):
         tr = w.tr if hubs == "included" else w.tr[~w.tr.src.isin(w.hubs) & ~w.tr.dst.isin(w.hubs)]
         active = set(tr.src) | set(tr.dst)
@@ -81,6 +81,8 @@ def evaluate_rules(w, labels_all, splits, seed=0):
         for rule in RULES:
             s, _, _ = rule_links(w, tr, rule, set(labels_all.address))
             m = score.evaluate(s, lab)
+            vc = s.value_counts().value_counts().rename_axis("size").reset_index(name="n_clusters")
+            sizes.append(vc.assign(rule=rule, hubs=hubs))
             rows.append({"hubs": hubs, "protocol": "full", "rule": rule, "split": -1, **m,
                          "clustered_addresses": len(s), "clusters": int(s.nunique()) if len(s) else 0})
             log(hubs, "full", rule, m["cross_exchange_pairs_linked"], m["pair_precision"])
@@ -94,6 +96,8 @@ def evaluate_rules(w, labels_all, splits, seed=0):
                 rows.append({"hubs": hubs, "protocol": "split50", "rule": rule, "split": k, **m,
                              "clustered_addresses": len(s), "clusters": int(s.nunique()) if len(s) else 0})
         log(hubs, "splits done")
+    if sizes_out:
+        pd.concat(sizes).to_csv(sizes_out, index=False)
     return pd.DataFrame(rows)
 
 
@@ -186,7 +190,7 @@ def main():
              **{f"flagged_{c}": int(w.tr[c].sum()) for c in ["poison_zero", "poison_lookalike", "sweeper", "aa_infra", "infra_any"]}}
     json.dump(stats, open(f"results/stats_{tag}.json", "w"), indent=2)
     log(stats)
-    evaluate_rules(w, labels, a.splits).to_csv(f"results/rules_{tag}.csv", index=False)
+    evaluate_rules(w, labels, a.splits, sizes_out=f"results/cluster_sizes_{tag}.csv").to_csv(f"results/rules_{tag}.csv", index=False)
     infra_attribution(w, labels).to_csv(f"results/infra_{tag}.csv", index=False)
     t, hc = taint_results(w, sources, labels)
     t.to_csv(f"results/taint_{tag}.csv", index=False)
