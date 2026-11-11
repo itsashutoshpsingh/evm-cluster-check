@@ -31,7 +31,8 @@ SOURCES = {
     "Bitrue": ("bitrue-cex/index.js", None),
     "Bitget": ("bitget/index.js", r"evmOwners\s*=\s*\[(.*?)\]"),
 }
-ETH_OWNERS = r"ethereum\s*:\s*\{[^{}]*?owners\s*:\s*\[(.*?)\]"
+OWNERS_RE = r"{chain}\s*:\s*\{{[^{{}}]*?owners\s*:\s*\[(.*?)\]"
+CHAIN_KEY = {"eth": "ethereum", "base": "base"}
 ADDR = re.compile(r"0x[0-9a-fA-F]{40}\b")
 
 
@@ -39,32 +40,45 @@ def strip_comments(js):
     return re.sub(r"//[^\n]*", "", js)
 
 
-def extract(js, pattern=None):
-    """Return the lower-cased Ethereum owner addresses in one adapter file."""
+def extract(js, pattern=None, chain="eth"):
+    """Return the lower-cased owner addresses for `chain` in one adapter file."""
     js = strip_comments(js)
-    blocks = re.findall(pattern or ETH_OWNERS, js, flags=re.S)
+    blocks = re.findall(pattern or OWNERS_RE.format(chain=CHAIN_KEY[chain]), js, flags=re.S)
     return sorted({a.lower() for b in blocks for a in ADDR.findall(b)})
 
 
-def load(fetch=True):
-    out = "data/raw/groundtruth/por.parquet"
+BITFINEX_OWN = "https://raw.githubusercontent.com/bitfinexcom/pub/83d06bdb5f5a2ce05d5ba2db5a426dd44c9f5128/wallets.txt"
+
+
+def verify_bitfinex(addrs):
+    """Cross-check the copied Bitfinex list against the list Bitfinex itself publishes."""
+    own = {l.split()[0].lower() for l in requests.get(BITFINEX_OWN, timeout=60).text.splitlines()
+           if "ETH/ERC20" in l and l.startswith("0x")}
+    return {"url": BITFINEX_OWN, "exchange_list": len(own), "copied_list": len(addrs), "identical": own == set(addrs)}
+
+
+def load(fetch=True, chain="eth"):
+    out = "data/raw/groundtruth/por.parquet" if chain == "eth" else f"data/raw/groundtruth/por_{chain}.parquet"
     if os.path.exists(out) and not fetch:
         return pd.read_parquet(out)
     rows, meta = [], {}
     for ex, (path, pat) in SOURCES.items():
         url = f"{BASE}/{path}"
         js = requests.get(url, timeout=60).text
-        addrs = extract(js, pat)
+        addrs = extract(js, pat, chain)
+        if not addrs:
+            continue
         meta[ex] = {"url": url, "n_addresses": len(addrs),
                     "sha256_of_sorted_list": hashlib.sha256("\n".join(addrs).encode()).hexdigest()}
         rows += [{"address": a, "exchange": ex} for a in addrs]
     df = pd.DataFrame(rows)
     df, overlaps = drop_overlaps(df)
-    meta = {"commit": COMMIT, "fetched_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+    checks = {"Bitfinex": verify_bitfinex(sorted(df[df.exchange == "Bitfinex"].address))} if chain == "eth" else {}
+    meta = {"commit": COMMIT, "verification": checks, "fetched_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
             "overlapping_addresses_dropped": overlaps, "exchanges": meta}
     os.makedirs(os.path.dirname(out), exist_ok=True)
     df.to_parquet(out)
-    with open("data/groundtruth/sources.json", "w") as f:
+    with open("data/groundtruth/sources.json" if chain == "eth" else f"data/groundtruth/sources_{chain}.json", "w") as f:
         json.dump(meta, f, indent=2)
     return df
 
@@ -84,6 +98,6 @@ def pairs(df):
 
 
 if __name__ == "__main__":
-    d = load()
-    print(d.exchange.value_counts().to_string())
-    print(json.load(open("data/groundtruth/sources.json"))["overlapping_addresses_dropped"], "overlaps dropped")
+    for ch in CHAIN_KEY:
+        d = load(chain=ch)
+        print(ch, d.exchange.value_counts().to_dict())
