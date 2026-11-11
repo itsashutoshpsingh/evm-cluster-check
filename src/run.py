@@ -118,8 +118,17 @@ def infra_attribution(w, labels):
     return pd.DataFrame(rows)
 
 
-def taint_results(w, sources, labels):
+def taint_results(w, seed_sets, labels):
     exch = set(labels.address)
+    rows, hcs = [], {}
+    for seeds, sources in seed_sets.items():
+        r, h = _taint_one(w, sources, labels, exch)
+        rows += [dict(x, seeds=seeds) for x in r]
+        hcs[seeds] = h
+    return pd.DataFrame(rows), hcs
+
+
+def _taint_one(w, sources, labels, exch):
     rows = []
     for name, tr in {"all_transfers": w.tr,
                      "no_zero_value": w.tr[~w.tr.poison_zero],
@@ -135,7 +144,7 @@ def taint_results(w, sources, labels):
     hc_rows = {"haircut_addresses_any_share": int(len(hc)), "haircut_addresses_share_ge_1pct": int((hc >= 0.01).sum()),
                "haircut_addresses_share_ge_50pct": int((hc >= 0.5).sum()),
                "haircut_por_wallets_any_share": int(hc.index.isin(exch).sum())}
-    return pd.DataFrame(rows), hc_rows
+    return rows, hc_rows
 
 
 def block_bootstrap(w, labels, rule="dar_naive", n_blocks=12, B=200, seed=1):
@@ -178,6 +187,9 @@ def main():
     tag = a.chain
     labels = groundtruth.load(fetch=False, chain=a.chain)
     sources = taint.ofac_eth("data/raw/ofac/SDN.XML")
+    # second seed set: the receiving addresses of EIP-7702 sweeper attacks published by SweeperHunter
+    collectors = sorted(set(pd.read_csv(VICTIMS, usecols=["trace_address_to"]).trace_address_to.str.lower()) - {"", "nan"}) \
+        if os.path.exists(VICTIMS) else []
     log("loading")
     w = Window(a.chain, a.blocks)
     stats = {"chain": a.chain, "blocks": [int(w.txs.block.min()), int(w.txs.block.max())],
@@ -186,13 +198,14 @@ def main():
              "userops": len(w.uo), "fresh_eoas_funded_in_window": len(w.funding), "hubs": len(w.hubs),
              "por_labels": len(labels), "por_labels_active": int(labels.address.isin(w.active).sum()),
              "ofac_eth_addresses": len(sources), "ofac_active": int(pd.Series(sources).isin(w.active).sum()),
+             "sweeper_collectors": len(collectors), "sweeper_collectors_active": int(pd.Series(collectors, dtype=str).isin(w.active).sum()),
              **{f"infra_{k}": v for k, v in w.infra_info.items()},
              **{f"flagged_{c}": int(w.tr[c].sum()) for c in ["poison_zero", "poison_lookalike", "sweeper", "aa_infra", "infra_any"]}}
     json.dump(stats, open(f"results/stats_{tag}.json", "w"), indent=2)
     log(stats)
     evaluate_rules(w, labels, a.splits, sizes_out=f"results/cluster_sizes_{tag}.csv").to_csv(f"results/rules_{tag}.csv", index=False)
     infra_attribution(w, labels).to_csv(f"results/infra_{tag}.csv", index=False)
-    t, hc = taint_results(w, sources, labels)
+    t, hc = taint_results(w, {"ofac_sdn": sources, "sweeperhunter_collectors": collectors}, labels)
     t.to_csv(f"results/taint_{tag}.csv", index=False)
     json.dump(hc, open(f"results/haircut_{tag}.json", "w"), indent=2)
     if a.bootstrap:
