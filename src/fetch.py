@@ -22,12 +22,15 @@ import pandas as pd
 import requests
 
 PROVIDERS = {
-    "eth": ["https://ethereum-rpc.publicnode.com", "https://eth.drpc.org", "https://1rpc.io/eth"],
+    # 1rpc.io was dropped: its free plan hit a daily usage cap after ~2k calls on 2026-11-11
+    "eth": ["https://ethereum-rpc.publicnode.com", "https://eth.drpc.org"],
     "base": ["https://base-rpc.publicnode.com", "https://mainnet.base.org"],
+    "anvil": ["http://127.0.0.1:8545"],  # local fork used by anvil/inject.py
 }
 # Only some free endpoints serve eth_getLogs for blocks older than ~128 blocks
 # (publicnode asks for a token, 1rpc refuses the method), found on 2026-11-11.
-LOG_PROVIDERS = {"eth": ["https://eth.drpc.org"], "base": ["https://base-rpc.publicnode.com", "https://mainnet.base.org"]}
+LOG_PROVIDERS = {"eth": ["https://eth.drpc.org"], "base": ["https://base-rpc.publicnode.com", "https://mainnet.base.org"],
+                 "anvil": ["http://127.0.0.1:8545"]}
 TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
 # ERC-4337 UserOperationEvent(bytes32 userOpHash, address sender, address paymaster, uint256 nonce, bool success, uint256 actualGasCost, uint256 actualGasUsed)
 USEROP = "0x49628fd1471006c1482da88028e9ce4dbb080b815c9b0344d39e5a8e6ec1419f"

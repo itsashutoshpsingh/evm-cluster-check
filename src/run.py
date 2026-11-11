@@ -53,7 +53,9 @@ def rule_links(w, tr, rule, exch):
         return s, used.rename(columns={"vu": "a", "vd": "b"})[["a", "b"]], deps
     if rule.startswith("funder_"):
         f = w.funding[w.funding.tx_hash.isin(set(tr.tx_hash))]
-        s, lk = funder.clusters(f, rule[7:], uo=w.uo)
+        # sponsor links come from UserOperation events, not transfers: drop them when AA infra is removed
+        aa_removed = w.tr.aa_infra.any() and not tr.aa_infra.any()
+        s, lk = funder.clusters(f, rule[7:], uo=None if aa_removed else w.uo)
         return s, lk, set()
     if rule == "cospend":
         lk = cospend.links(tr, w.eoas)
