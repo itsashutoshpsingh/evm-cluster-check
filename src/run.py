@@ -44,8 +44,11 @@ class Window:
         self.active = set(tr.src) | set(tr.dst)
 
 
-def rule_links(w, tr, rule, exch):
-    """(link pairs a,b ; addresses to drop after linking) for one rule on transfers `tr`."""
+def rule_links(w, tr, rule, exch, drop_aa=False):
+    """(clusters, link pairs a,b, addresses dropped after linking) for one rule on transfers `tr`.
+
+    drop_aa: also drop links that come from ERC-4337 UserOperation events (sponsor links).
+    """
     if rule.startswith("dar_"):
         p = dar.paths(tr, exch)
         variant = rule[4:]
@@ -53,15 +56,13 @@ def rule_links(w, tr, rule, exch):
         return s, used.rename(columns={"vu": "a", "vd": "b"})[["a", "b"]], deps
     if rule.startswith("funder_"):
         f = w.funding[w.funding.tx_hash.isin(set(tr.tx_hash))]
-        # sponsor links come from UserOperation events, not transfers: drop them when AA infra is removed
-        aa_removed = w.tr.aa_infra.any() and not tr.aa_infra.any()
-        s, lk = funder.clusters(f, rule[7:], uo=None if aa_removed else w.uo)
+        s, lk = funder.clusters(f, rule[7:], uo=None if drop_aa else w.uo)
         return s, lk, set()
     if rule == "cospend":
         lk = cospend.links(tr, w.eoas)
         return cospend.clusters(lk), lk[["a", "b"]], set()
     if rule == "all":
-        parts = [rule_links(w, tr, r, exch) for r in ("dar_victor", "funder_naive", "cospend")]
+        parts = [rule_links(w, tr, r, exch, drop_aa) for r in ("dar_victor", "funder_aa_sponsor", "cospend")]
         lk = pd.concat([p[1] for p in parts], ignore_index=True).drop_duplicates()
         drop = set().union(*[p[2] for p in parts])
         return components(lk, drop=drop), lk, drop
@@ -105,7 +106,7 @@ def infra_attribution(w, labels):
         row = {"rule": rule, "false_pairs": base}
         for name, cols in {**INFRA, "all_infrastructure": [c for v in INFRA.values() for c in v]}.items():
             keep = ~w.tr[cols].any(axis=1)
-            fp = score.evaluate(rule_links(w, w.tr[keep], rule, exch)[0], lab)["cross_exchange_pairs_linked"]
+            fp = score.evaluate(rule_links(w, w.tr[keep], rule, exch, drop_aa="aa_infra" in cols)[0], lab)["cross_exchange_pairs_linked"]
             row[f"false_pairs_without_{name}"] = fp
             row[f"share_caused_by_{name}"] = (base - fp) / base if base else float("nan")
         rows.append(row)

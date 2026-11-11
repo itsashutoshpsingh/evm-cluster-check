@@ -1,0 +1,30 @@
+{
+  "chain": "eth",
+  "blocks": [
+    26316189,
+    26318388
+  ],
+  "transactions": 388328,
+  "logs": 877327,
+  "transfers": 991505,
+  "eth_transfers": 130169,
+  "erc20_transfers": 861336,
+  "userops": 5748,
+  "fresh_eoas_funded_in_window": 17201,
+  "hubs": 27,
+  "por_labels": 452,
+  "por_labels_active": 65,
+  "ofac_eth_addresses": 127,
+  "ofac_active": 0,
+  "infra_lookalike_pairs": 106603,
+  "infra_sweeper_contracts": 508,
+  "infra_sweeper_victims": 5750,
+  "infra_delegations_in_window": 3858,
+  "infra_bundlers": 95,
+  "infra_paymasters": 24,
+  "flagged_poison_zero": 76350,
+  "flagged_poison_lookalike": 146093,
+  "flagged_sweeper": 69,
+  "flagged_aa_infra": 510,
+  "flagged_infra_any": 196908
+}
