@@ -79,12 +79,18 @@ def run(w, labels, n=20, seed=7):
     shuffled = pairs.sample(frac=1, random_state=seed)
     sample = shuffled.groupby(["ea", "eb"]).head(3).head(n)
     rows, raw = [], []
+    txstat = w.tr.groupby("tx_hash").agg(n_transfers=("src", "size"), n_senders=("src", "nunique"), zero=("poison_zero", "mean"))
+    to_of = w.txs.set_index("hash").to
     for i, r in enumerate(sample.itertuples(), 1):
         path = nx.shortest_path(g, r.a, r.b)
         kinds, causes = classify(path, g, labels, w.hubs, deposits)
+        txs = list(dict.fromkeys(g[x][y]["tx"] for x, y in zip(path, path[1:])))
+        st = txstat.reindex(txs)
         rows.append({"case": i, "exchange_a": r.ea, "exchange_b": r.eb, "a_id": hid(r.a), "b_id": hid(r.b),
                      "hops": len(path) - 1, "link_kinds": " > ".join(kinds), "cause": "; ".join(causes),
-                     "txs_on_chain": len({g[x][y]["tx"] for x, y in zip(path, path[1:])})})
+                     "txs_on_chain": len(txs), "max_transfers_in_one_tx": int(st.n_transfers.max()),
+                     "max_senders_in_one_tx": int(st.n_senders.max()), "zero_value_share_on_chain_txs": round(float(st.zero.mean()), 2),
+                     "tx_targets": " ".join(hid(to_of.get(t, "")) for t in txs)})
         raw.append({"case": i, "path": " ".join(path), "txs": " ".join(g[x][y]["tx"] for x, y in zip(path, path[1:]))})
     out = pd.DataFrame(rows)
     pd.DataFrame(raw).to_csv("data/raw/handcheck_raw.csv", index=False)
