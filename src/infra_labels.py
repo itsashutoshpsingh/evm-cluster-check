@@ -71,7 +71,7 @@ def sweeper_sets(txs, sweeper_csv, victims_csv=None):
     auth = recover_authorities(txs)
     victims = set(auth[auth.delegate.isin(contracts)].authority)
     if victims_csv is not None:
-        victims |= set(pd.read_csv(victims_csv, usecols=["address_to"]).address_to.str.lower())
+        victims |= set(pd.read_csv(victims_csv, usecols=["address_to"], dtype=str).address_to.dropna().str.lower())
     return contracts, victims, auth
 
 

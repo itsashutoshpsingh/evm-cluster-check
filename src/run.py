@@ -199,7 +199,7 @@ def main():
     labels = groundtruth.load(fetch=False, chain=a.chain)
     sources = taint.ofac_eth("data/raw/ofac/SDN.XML")
     # second seed set: the receiving addresses of EIP-7702 sweeper attacks published by SweeperHunter
-    collectors = sorted(set(pd.read_csv(VICTIMS, usecols=["trace_address_to"]).trace_address_to.str.lower()) - {"", "nan"}) \
+    collectors = sorted(set(pd.read_csv(VICTIMS, usecols=["trace_address_to"], dtype=str).trace_address_to.dropna().str.lower())) \
         if os.path.exists(VICTIMS) else []
     log("loading")
     w = Window(a.chain, a.blocks)
