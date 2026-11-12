@@ -38,6 +38,7 @@ figures:
 	$(PY) -m src.figures
 
 notebook:
+	$(PY) notebooks/make_notebook.py
 	$(PY) -m jupyter nbconvert --to notebook --execute --inplace notebooks/01_week1_result.ipynb
 
 test:

@@ -1,0 +1,26 @@
+{
+  "window_blocks": [
+    26316189,
+    26337722
+  ],
+  "eth_eoa_forward_paths_loose": 5537,
+  "amax_p95_eth": 0.4628106192262894,
+  "tmax_p95_blocks": 4828.599999999993,
+  "deposit_addresses": 26762,
+  "deposit_users": 9946,
+  "share_users_sharing_deposit": 0.2417052081238689,
+  "multi_address_clusters": 444,
+  "mean_cluster_size_multi": 2.9481981981981984,
+  "sd_cluster_size_multi": 6.418407599562969,
+  "largest_cluster": 102,
+  "victor_2020": {
+    "amax_p95_eth": 0.0083,
+    "tmax_p95_blocks": 3185,
+    "share_users_sharing_deposit": 0.443
+  },
+  "tutela_2022": {
+    "mean_cluster_size": 4.3,
+    "sd_cluster_size": 8.6,
+    "largest_cluster": 2100
+  }
+}

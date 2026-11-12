@@ -43,6 +43,9 @@ The misses, dead ends and limits of this project, in the order I hit them. Each 
 17. **The hub threshold (1,000 distinct counterparties in the window) is my choice,** not taken from a paper. It is reported as a separate variant, never folded into the main number.
 18. **Full-history reproduction of Victor and Tutela was not possible.** They ran on every block since 2015, and three days cannot reproduce cluster counts. What I could reproduce is Victor's parameter estimation and the share of deposit users who share a deposit address (`results/reproduce_eth.json`). The numbers agree in some respects and not others, and the README says which.
 
+19. **The taint stage ran the machine out of memory.** It built four full copies of the 11-million-row transfer table at once, one per edge variant. The process was killed and took the whole working environment down with it, losing the in-progress run. It now keeps one three-column copy and filters it per variant, and every stage resumes from its saved output.
+20. **The 20 "hand-checks" were classified by script.** `handcheck.py` follows each sampled link chain and labels it from the transactions on it. I did not open each case on a block explorer and judge it by eye, which the plan called for. Two chains came out as "unexplained by these rules" and need that manual look.
+
 ## What I would do with more access
 
 - **BigQuery** (`bigquery-public-data.crypto_ethereum`): two months instead of three days, plus internal transfers from `traces` and transaction status from `receipts`.
