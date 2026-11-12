@@ -1,0 +1,32 @@
+{
+  "chain": "base",
+  "blocks": [
+    53350927,
+    53361726
+  ],
+  "transactions": 1289759,
+  "logs": 1780069,
+  "transfers": 1667939,
+  "eth_transfers": 111623,
+  "erc20_transfers": 1556316,
+  "userops": 92848,
+  "fresh_eoas_funded_in_window": 5038,
+  "hubs": 40,
+  "por_labels": 97,
+  "por_labels_active": 13,
+  "ofac_eth_addresses": 127,
+  "ofac_active": 0,
+  "sweeper_collectors": 362,
+  "sweeper_collectors_active": 5,
+  "infra_lookalike_pairs": 31605,
+  "infra_sweeper_contracts": 508,
+  "infra_sweeper_victims": 5748,
+  "infra_delegations_in_window": 8371,
+  "infra_bundlers": 910,
+  "infra_paymasters": 45,
+  "flagged_poison_zero": 18055,
+  "flagged_poison_lookalike": 49241,
+  "flagged_sweeper": 165,
+  "flagged_aa_infra": 585,
+  "flagged_infra_any": 53626
+}
