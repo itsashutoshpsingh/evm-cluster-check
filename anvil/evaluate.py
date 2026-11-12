@@ -22,10 +22,7 @@ class W:
 
 def window():
     w = W()
-    w.txs = edges.read("anvil", "txs", META["blocks"])
-    w.logs = edges.read("anvil", "logs", META["blocks"])
-    tr = edges.transfers(w.txs, w.logs)
-    w.uo = edges.userops(w.logs, w.txs)
+    w.txs, tr, w.uo, _ = edges.load("anvil", META["blocks"])
     pd.DataFrame({"contract": [META["sweeper"]]}).to_csv("anvil/sweeper.csv", index=False)
     w.tr, w.infra_info, _ = label(tr, w.txs, w.uo, "anvil/sweeper.csv")
     w.tr["infra_any"] = w.tr[["poison_zero", "poison_lookalike", "sweeper", "aa_infra"]].any(axis=1)
