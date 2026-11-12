@@ -167,11 +167,12 @@ def taint_results(w, seed_sets, labels):
 
 def _taint_one(w, sources, labels, exch):
     rows = []
-    for name, tr in {"all_transfers": w.tr,
-                     "no_zero_value": w.tr[~w.tr.poison_zero],
-                     "no_poisoning": w.tr[~(w.tr.poison_zero | w.tr.poison_lookalike)],
-                     "no_infrastructure": w.tr[~w.tr.infra_any]}.items():
-        r = taint.nhop(tr, sources, hops=3)
+    e = w.tr[["src", "dst", "block"]]  # one slim copy, filtered per variant: four full copies ran out of memory
+    for name, keep in {"all_transfers": None,
+                       "no_zero_value": ~w.tr.poison_zero,
+                       "no_poisoning": ~(w.tr.poison_zero | w.tr.poison_lookalike),
+                       "no_infrastructure": ~w.tr.infra_any}.items():
+        r = taint.nhop(e if keep is None else e[keep], sources, hops=3)
         for k in (1, 2, 3):
             hit = r[(r.hop >= 1) & (r.hop <= k)]
             rows.append({"edges": name, "hops": k, "tainted_addresses": len(hit),
