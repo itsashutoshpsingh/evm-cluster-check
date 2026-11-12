@@ -1,0 +1,52 @@
+{
+ "project": "evm-cluster-check",
+ "headline": "On 3 days of Ethereum (5.44M transactions), naive deposit-address reuse merged 198 pairs of addresses from two different exchanges, none caused by poisoning, sweepers or fee services; the same-sender rule merged 359, and 60% of those came only through poisoning transfers.",
+ "metrics": [
+  {
+   "label": "cross-exchange false merges, deposit-address reuse",
+   "value": 198
+  },
+  {
+   "label": "of those caused by infrastructure",
+   "value": "0%"
+  },
+  {
+   "label": "cross-exchange false merges, same sender in one tx",
+   "value": 359
+  },
+  {
+   "label": "of those caused by poisoning",
+   "value": "60%"
+  },
+  {
+   "label": "Ethereum transactions analysed",
+   "value": "5,440,040"
+  },
+  {
+   "label": "exchange PoR addresses as ground truth",
+   "value": 452
+  }
+ ],
+ "charts": [
+  {
+   "path": "docs/img/false_merges_by_rule_eth.png",
+   "label": "False merges by rule",
+   "alt": "Bar chart of cross-exchange false merges per clustering rule, with hubs included and excluded"
+  },
+  {
+   "path": "docs/img/infra_causes_eth.png",
+   "label": "Causes",
+   "alt": "Share of false merges that disappear when poisoning, sweeper and paymaster transfers are removed"
+  },
+  {
+   "path": "docs/img/taint_eth.png",
+   "label": "Taint",
+   "alt": "Addresses tainted at 1 to 3 hops, with and without zero-value transfers"
+  },
+  {
+   "path": "docs/img/injected.png",
+   "label": "Injected tests",
+   "alt": "False links made by each rule on wallets I control on a local fork"
+  }
+ ]
+}
