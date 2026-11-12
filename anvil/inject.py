@@ -18,6 +18,7 @@ Scenarios (each one is a real transaction on the fork):
   S7 7702 sweeper    Dave's wallet is delegated to a sweeper; Carol pays Dave, the ETH is swept
 """
 import json
+import os
 import subprocess
 import time
 
@@ -26,7 +27,7 @@ from eth_hash.auto import keccak
 from eth_keys import keys
 
 RPC = "http://127.0.0.1:8545"
-CAST = "/tmp/claude-0/foundry/cast"
+CAST = os.environ.get("CAST", "cast")  # Foundry cast binary
 USDT = "0xdac17f958d2ee523a2206206994597c13d831ec7"
 MULTICALL3 = "0xca11bde05977b3631167028862be2a173976ca11"
 ENTRYPOINT_V07 = "0x0000000071727de22e5e9d8baf0edac6f37da032"
