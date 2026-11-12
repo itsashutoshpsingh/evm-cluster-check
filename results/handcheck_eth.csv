@@ -1,0 +1,21 @@
+case,exchange_a,exchange_b,a_id,b_id,hops,link_kinds,cause,txs_on_chain,max_transfers_in_one_tx,max_senders_in_one_tx,zero_value_share_on_chain_txs,tx_targets
+1,Bitfinex,Gemini,60d13743,290412c5,2,cospend > cospend,unexplained by these rules,1,50,50,0.0,1134dbd0
+2,OKX,KuCoin,e0d4b63b,c86d2ebb,3,dar > cospend > cospend,exchange wallet paid a deposit address (treated as a customer); poisoning transfers in one transaction,2,35,35,0.0,6904665e 1134dbd0
+3,OKX,Bitrue,bebff99f,7fe9c7e5,5,dar > dar > dar > dar > cospend,chain passes through a third exchange's wallet; exchange wallet paid a deposit address (treated as a customer); unlabelled high-degree hub on the chain,5,43,43,0.0,bebff99f 30e93d62 30e93d62 0261151b 1134dbd0
+4,OKX,KuCoin,f88dda28,93adbbee,3,cospend > cospend > cospend,poisoning transfers in one transaction,3,688,688,0.33,9cbdea5a ee432fce 08624c46
+5,OKX,KuCoin,08a45a03,5b2a6d14,5,cospend > cospend > cospend > dar > dar,exchange wallet paid a deposit address (treated as a customer); poisoning transfers in one transaction,4,342,342,0.25,08624c46 ee432fce 63cbd95b 63cbd95b
+6,OKX,Bitget,a0b13701,4832ae90,3,cospend > cospend > cospend,unlabelled high-degree hub on the chain,3,250,186,0.0,f25892d6 80e86331 80e86331
+7,OKX,Gate,08a45a03,c8d0b12f,4,cospend > cospend > cospend > cospend,poisoning transfers in one transaction,3,363,363,0.67,ee432fce 50dc531d c317de61
+8,OKX,Bitget,7bb9d7f6,56de8052,4,dar > dar > cospend > cospend,exchange wallet paid a deposit address (treated as a customer); poisoning transfers in one transaction; unlabelled high-degree hub on the chain,4,180,180,0.0,7bb9d7f6 63cbd95b 1134dbd0 08624c46
+9,OKX,Gate,7a445537,c8d0b12f,5,dar > cospend > cospend > cospend > cospend,exchange wallet paid a deposit address (treated as a customer); poisoning transfers in one transaction,4,222,218,0.25,c2340751 1134dbd0 50dc531d c317de61
+10,KuCoin,Gate,93adbbee,c8d0b12f,4,cospend > cospend > cospend > cospend,poisoning transfers in one transaction,3,688,688,0.33,08624c46 50dc531d c317de61
+11,OKX,Bitrue,7a445537,7fe9c7e5,3,dar > dar > cospend,chain passes through a third exchange's wallet; exchange wallet paid a deposit address (treated as a customer); unlabelled high-degree hub on the chain,3,43,43,0.0,c2340751 bb30886f 1134dbd0
+12,OKX,Bitget,dcaaeeb0,e5f1a060,3,cospend > cospend > dar,exchange wallet paid a deposit address (treated as a customer); poisoning transfers in one transaction,3,117,117,0.33,ee432fce 08624c46 1674e13d
+13,Bitrue,Bitget,7fe9c7e5,56de8052,3,cospend > cospend > cospend,poisoning transfers in one transaction,3,180,180,0.0,1134dbd0 08624c46 08624c46
+14,OKX,Gemini,dcaaeeb0,290412c5,3,cospend > cospend > cospend,poisoning transfers in one transaction,3,117,117,0.33,ee432fce 08624c46 1134dbd0
+15,KuCoin,Gemini,3b748a9a,290412c5,2,dar > dar,exchange wallet paid a deposit address (treated as a customer),2,1,1,0.0,d8c7318e d8c7318e
+16,Bitfinex,Bitrue,60d13743,7fe9c7e5,3,cospend > cospend > cospend,unexplained by these rules,2,65,64,0.0,1134dbd0 1134dbd0
+17,OKX,Bitrue,085a4791,7fe9c7e5,4,cospend > cospend > cospend > cospend,poisoning transfers in one transaction; unlabelled high-degree hub on the chain,3,101,101,0.0,08624c46 08624c46 1134dbd0
+18,KuCoin,Gemini,fa4b10e0,290412c5,3,cospend > cospend > cospend,poisoning transfers in one transaction,3,75,74,0.33,08624c46 ee432fce 1134dbd0
+19,OKX,Gemini,8372a2cb,290412c5,4,cospend > cospend > cospend > cospend,poisoning transfers in one transaction,3,103,102,0.33,ee432fce 1134dbd0 1134dbd0
+20,OKX,Bitfinex,7bb9d7f6,60d13743,4,dar > funder > dar > dar,chain passes through a third exchange's wallet; exchange wallet paid a deposit address (treated as a customer); exchange withdrawal read as gas funding; unlabelled high-degree hub on the chain,4,1,1,0.0,7bb9d7f6 d3376e8e 1674e13d 63cbd95b
