@@ -29,19 +29,30 @@ class Window:
     """Everything one evaluation needs, built once per chain."""
 
     def __init__(self, chain, blocks=None):
-        self.txs, tr, self.uo, self.n_logs = edges.load(chain, blocks)
-        tr, self.infra_info, self.infra_sets = label(tr, self.txs, self.uo, SWEEPERS, VICTIMS if os.path.exists(VICTIMS) else None)
-        tr["infra_any"] = tr[[c for v in INFRA.values() for c in v]].any(axis=1)
-        self.tr = tr
+        cache = f"data/raw/cache/{chain}_{blocks[0]}_{blocks[1]}" if blocks else f"data/raw/cache/{chain}"
+        if os.path.exists(f"{cache}/meta.json"):  # labelled tables from an earlier run of the same window
+            self.txs, self.tr, self.uo, self.funding = (pd.read_parquet(f"{cache}/{n}.parquet") for n in ("txs", "tr", "uo", "funding"))
+            meta = json.load(open(f"{cache}/meta.json"))
+            self.n_logs, self.infra_info, self.hubs = meta["n_logs"], meta["infra_info"], set(meta["hubs"])
+        else:
+            self.txs, tr, self.uo, self.n_logs = edges.load(chain, blocks)
+            tr, self.infra_info, _ = label(tr, self.txs, self.uo, SWEEPERS, VICTIMS if os.path.exists(VICTIMS) else None)
+            tr["infra_any"] = tr[[c for v in INFRA.values() for c in v]].any(axis=1)
+            self.tr = tr
+            lo, hi = np.minimum(tr.src.to_numpy(object), tr.dst.to_numpy(object)), np.maximum(tr.src.to_numpy(object), tr.dst.to_numpy(object))
+            u = pd.DataFrame({"a": lo, "b": hi}).drop_duplicates()  # undirected pairs, so each counterparty counts once
+            deg = pd.concat([u.a, u.b]).value_counts()
+            del lo, hi, u
+            self.hubs = set(deg[deg >= HUB_DEGREE].index)
+            self.funding = funder.funding(self.txs, tr)
+            os.makedirs(cache, exist_ok=True)
+            for n in ("txs", "tr", "uo", "funding"):
+                getattr(self, n).to_parquet(f"{cache}/{n}.parquet")
+            json.dump({"n_logs": self.n_logs, "infra_info": self.infra_info, "hubs": sorted(self.hubs)}, open(f"{cache}/meta.json", "w"))
         self.miners = set(self.txs.miner)
         self.eoas = set(self.txs["from"])
-        lo, hi = np.minimum(tr.src.to_numpy(object), tr.dst.to_numpy(object)), np.maximum(tr.src.to_numpy(object), tr.dst.to_numpy(object))
-        u = pd.DataFrame({"a": lo, "b": hi}).drop_duplicates()  # undirected pairs, so each counterparty counts once
-        deg = pd.concat([u.a, u.b]).value_counts()
-        del lo, hi, u
-        self.hubs = set(deg[deg >= HUB_DEGREE].index)
-        self.funding = funder.funding(self.txs, tr)
-        self.active = set(tr.src) | set(tr.dst)
+        self.active = set(self.tr.src) | set(self.tr.dst)
+        self.memo = {}
 
 
 def dar_paths(w, tr, exch):
@@ -65,19 +76,30 @@ def rule_links(w, tr, rule, exch, drop_aa=False):
         variant = rule[4:]
         s, deps, used = dar.clusters(p, variant, exch=exch, miners=w.miners)
         return s, used.rename(columns={"vu": "a", "vd": "b"})[["a", "b"]], deps
-    if rule.startswith("funder_"):
-        f = w.funding[w.funding.tx_hash.isin(set(tr.tx_hash))]
-        s, lk = funder.clusters(f, rule[7:], uo=None if drop_aa else w.uo)
-        return s, lk, set()
-    if rule == "cospend":
-        lk = cospend.links(tr, w.eoas)
-        return cospend.clusters(lk), lk[["a", "b"]], set()
+    if rule.startswith(("funder_", "cospend")):
+        # these rules ignore the exchange labels, so reuse them across label splits of the same transfers
+        which = "full" if tr is w.tr else "nohub" if tr is getattr(w, "tr_nohub", None) else None
+        if which is None:
+            return _exch_free(w, tr, rule, drop_aa)
+        key = (rule, which, drop_aa)
+        if key not in w.memo:
+            w.memo[key] = _exch_free(w, tr, rule, drop_aa)
+        return w.memo[key]
     if rule == "all":
         parts = [rule_links(w, tr, r, exch, drop_aa) for r in ("dar_victor", "funder_aa_sponsor", "cospend")]
         lk = pd.concat([p[1] for p in parts], ignore_index=True).drop_duplicates()
         drop = set().union(*[p[2] for p in parts])
         return components(lk, drop=drop), lk, drop
     raise ValueError(rule)
+
+
+def _exch_free(w, tr, rule, drop_aa):
+    if rule.startswith("funder_"):
+        f = w.funding[w.funding.tx_hash.isin(set(tr.tx_hash))]
+        s, lk = funder.clusters(f, rule[7:], uo=None if drop_aa else w.uo)
+        return s, lk, set()
+    lk = cospend.links(tr, w.eoas)
+    return cospend.clusters(lk), lk[["a", "b"]], set()
 
 
 RULES = ["dar_naive", "dar_victor", "dar_hubfiltered", "funder_naive", "funder_hubfiltered", "funder_aa_sponsor", "cospend", "all"]
@@ -87,6 +109,7 @@ def evaluate_rules(w, labels_all, splits, seed=0, sizes_out=None):
     rows, sizes = [], []
     for hubs in ("included", "excluded"):
         tr = w.tr if hubs == "included" else w.tr[~w.tr.src.isin(w.hubs) & ~w.tr.dst.isin(w.hubs)]
+        w.tr_nohub = tr
         active = set(tr.src) | set(tr.dst)
         lab = labels_all[labels_all.address.isin(active)].reset_index(drop=True)
         for rule in RULES:
@@ -167,10 +190,16 @@ def block_bootstrap(w, labels, rule="dar_naive", n_blocks=12, B=200, seed=1):
     seg = np.searchsorted(edges_, w.tr.block.to_numpy(), side="right") - 1
     rng = np.random.default_rng(seed)
     out = []
+    if rule == "cospend":  # links are per transaction, so a time subset is exactly a filter on the full list
+        lk = cospend.links(w.tr, w.eoas)
+        lk_seg = lk.tx_hash.map(pd.Series(seg, index=w.tr.tx_hash).groupby(level=0).first())
     for b in range(B):
         pick = np.unique(rng.integers(0, n_blocks, n_blocks))
-        tr = w.tr[np.isin(seg, pick)]
-        m = score.evaluate(rule_links(w, tr, rule, exch)[0], lab)
+        if rule == "cospend":
+            s = cospend.clusters(lk[lk_seg.isin(pick)])
+        else:
+            s = rule_links(w, w.tr[np.isin(seg, pick)], rule, exch)[0]
+        m = score.evaluate(s, lab)
         out.append({"b": b, "segments": len(pick), "cross_exchange_pairs_linked": m["cross_exchange_pairs_linked"],
                     "clusters_with_2plus_exchanges": m["clusters_with_2plus_exchanges"], "pair_precision": m["pair_precision"]})
     return pd.DataFrame(out)
