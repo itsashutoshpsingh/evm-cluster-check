@@ -29,16 +29,16 @@ class Window:
     """Everything one evaluation needs, built once per chain."""
 
     def __init__(self, chain, blocks=None):
-        self.txs = edges.read(chain, "txs", blocks)
-        self.logs = edges.read(chain, "logs", blocks)
-        tr = edges.transfers(self.txs, self.logs)
-        self.uo = edges.userops(self.logs, self.txs)
+        self.txs, tr, self.uo, self.n_logs = edges.load(chain, blocks)
         tr, self.infra_info, self.infra_sets = label(tr, self.txs, self.uo, SWEEPERS, VICTIMS if os.path.exists(VICTIMS) else None)
         tr["infra_any"] = tr[[c for v in INFRA.values() for c in v]].any(axis=1)
         self.tr = tr
         self.miners = set(self.txs.miner)
         self.eoas = set(self.txs["from"])
-        deg = pd.concat([tr[["src", "dst"]], tr[["dst", "src"]].set_axis(["src", "dst"], axis=1)]).drop_duplicates().src.value_counts()
+        lo, hi = np.minimum(tr.src.to_numpy(object), tr.dst.to_numpy(object)), np.maximum(tr.src.to_numpy(object), tr.dst.to_numpy(object))
+        u = pd.DataFrame({"a": lo, "b": hi}).drop_duplicates()  # undirected pairs, so each counterparty counts once
+        deg = pd.concat([u.a, u.b]).value_counts()
+        del lo, hi, u
         self.hubs = set(deg[deg >= HUB_DEGREE].index)
         self.funding = funder.funding(self.txs, tr)
         self.active = set(tr.src) | set(tr.dst)
@@ -204,7 +204,7 @@ def main():
     log("loading")
     w = Window(a.chain, a.blocks)
     stats = {"chain": a.chain, "blocks": [int(w.txs.block.min()), int(w.txs.block.max())],
-             "transactions": len(w.txs), "logs": len(w.logs), "transfers": len(w.tr),
+             "transactions": len(w.txs), "logs": w.n_logs, "transfers": len(w.tr),
              "eth_transfers": int((w.tr.kind == "eth").sum()), "erc20_transfers": int((w.tr.kind == "erc20").sum()),
              "userops": len(w.uo), "fresh_eoas_funded_in_window": len(w.funding), "hubs": len(w.hubs),
              "por_labels": len(labels), "por_labels_active": int(labels.address.isin(w.active).sum()),

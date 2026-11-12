@@ -20,6 +20,32 @@ def read(chain, what, blocks=None):
     return df.reset_index(drop=True)
 
 
+TX_COLS = ["block", "ts", "miner", "hash", "tx_index", "nonce", "from", "to", "value_wei", "value_eth", "auth"]
+LOG_COLS = ["block", "tx_hash", "log_index", "address", "topic0", "ntopics", "a1", "a2", "a3", "data"]
+
+
+def load(chain, blocks=None):
+    """Stream the chunk files into (slim txs, transfers, userops, n_logs) without holding all logs at once."""
+    txs, trs, uos, n_logs = [], [], [], 0
+    for f in sorted(glob.glob(f"data/raw/{chain}/txs/*.parquet")):
+        t = pd.read_parquet(f, columns=TX_COLS)
+        g = pd.read_parquet(f.replace("/txs/", "/logs/"), columns=LOG_COLS)
+        if blocks is not None:
+            t, g = t[t.block.between(*blocks)], g[g.block.between(*blocks)]
+        if t.empty:
+            continue
+        n_logs += len(g)
+        trs.append(transfers(t, g))
+        uos.append(userops(g, t))
+        txs.append(t.drop(columns=["ts", "value_wei", "value_eth"]))
+    txs = pd.concat(txs, ignore_index=True)
+    txs["miner"] = txs.miner.astype("category")
+    tr = pd.concat(trs, ignore_index=True)
+    tr["asset"] = tr.asset.astype("category")
+    tr["kind"] = tr.kind.astype("category")
+    return txs, tr, pd.concat(uos, ignore_index=True), n_logs
+
+
 def word(data, i=0):
     """i-th 32-byte word of ABI data as an int (0 if absent)."""
     s = data[2 + 64 * i: 2 + 64 * (i + 1)]
