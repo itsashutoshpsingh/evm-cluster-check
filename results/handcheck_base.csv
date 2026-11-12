@@ -1,0 +1,8 @@
+case,exchange_a,exchange_b,a_id,b_id,hops,link_kinds,cause,txs_on_chain,max_transfers_in_one_tx,max_senders_in_one_tx,zero_value_share_on_chain_txs,tx_targets
+1,OKX,Bitget,c661a23a,e5f1a060,4,funder > cospend > cospend > funder,exchange withdrawal read as gas funding; poisoning transfers in one transaction,4,300,161,0.24,e2f97c83 432123be 432123be 101d914b
+2,OKX,Bitget,c37bc875,e5f1a060,5,cospend > cospend > cospend > cospend > funder,exchange withdrawal read as gas funding; poisoning transfers in one transaction,5,300,198,0.19,45c8be0e 432123be 432123be 432123be 101d914b
+3,OKX,KuCoin,c661a23a,4d1286d8,5,funder > cospend > cospend > cospend > cospend,exchange withdrawal read as gas funding; poisoning transfers in one transaction,5,189,125,0.09,a39fcc64 432123be 432123be 45c8be0e 45c8be0e
+4,KuCoin,Bitget,4d1286d8,e5f1a060,6,cospend > cospend > cospend > cospend > cospend > funder,exchange withdrawal read as gas funding; poisoning transfers in one transaction,5,164,93,0.1,45c8be0e a5e5fb4e e3a9742d 432123be 2243a13e
+5,OKX,KuCoin,c37bc875,4d1286d8,5,cospend > cospend > cospend > cospend > cospend,poisoning transfers in one transaction,5,126,115,0.03,45c8be0e 432123be 432123be 45c8be0e 45c8be0e
+6,OKX,KuCoin,c661a23a,d3ca9e38,4,funder > cospend > cospend > funder,exchange withdrawal read as gas funding; poisoning transfers in one transaction,3,300,237,0.05,a39fcc64 432123be 3960730c
+7,KuCoin,Bitget,d3ca9e38,e5f1a060,2,dar > dar,exchange wallet paid a deposit address (treated as a customer),2,1,1,0.0,4e2d9269 2197998f

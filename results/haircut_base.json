@@ -1,0 +1,14 @@
+{
+  "ofac_sdn": {
+    "haircut_addresses_any_share": 0,
+    "haircut_addresses_share_ge_1pct": 0,
+    "haircut_addresses_share_ge_50pct": 0,
+    "haircut_por_wallets_any_share": 0
+  },
+  "sweeperhunter_collectors": {
+    "haircut_addresses_any_share": 2,
+    "haircut_addresses_share_ge_1pct": 2,
+    "haircut_addresses_share_ge_50pct": 2,
+    "haircut_por_wallets_any_share": 0
+  }
+}
