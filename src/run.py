@@ -102,6 +102,7 @@ def _exch_free(w, tr, rule, drop_aa):
     return cospend.clusters(lk), lk[["a", "b"]], set()
 
 
+SLIM = ["block", "tx_hash", "log_index", "src", "dst", "asset", "raw", "amount", "kind", "poison_zero", "poison_lookalike"]
 RULES = ["dar_naive", "dar_victor", "dar_hubfiltered", "funder_naive", "funder_hubfiltered", "funder_aa_sponsor", "cospend", "all"]
 
 
@@ -132,24 +133,26 @@ def evaluate_rules(w, labels_all, splits, seed=0, sizes_out=None):
         log(hubs, "splits done")
     if sizes_out:
         pd.concat(sizes).to_csv(sizes_out, index=False)
+    w.tr_nohub, w.memo = None, {}  # free the hub-filtered copy before the next stage
     return pd.DataFrame(rows)
 
 
 def infra_attribution(w, labels):
+    """Re-run every rule with one class of infrastructure transfers removed (one copy per class)."""
     lab = labels[labels.address.isin(w.active)].reset_index(drop=True)
     exch = set(labels.address)
-    rows = []
-    for rule in RULES:
-        base = score.evaluate(rule_links(w, w.tr, rule, exch)[0], lab)["cross_exchange_pairs_linked"]
-        row = {"rule": rule, "false_pairs": base}
-        for name, cols in {**INFRA, "all_infrastructure": [c for v in INFRA.values() for c in v]}.items():
-            keep = ~w.tr[cols].any(axis=1)
-            fp = score.evaluate(rule_links(w, w.tr[keep], rule, exch, drop_aa="aa_infra" in cols)[0], lab)["cross_exchange_pairs_linked"]
-            row[f"false_pairs_without_{name}"] = fp
-            row[f"share_caused_by_{name}"] = (base - fp) / base if base else float("nan")
-        rows.append(row)
-        log("infra", rule, row)
-    return pd.DataFrame(rows)
+    rows = {r: {"rule": r, "false_pairs": score.evaluate(rule_links(w, w.tr, r, exch)[0], lab)["cross_exchange_pairs_linked"]} for r in RULES}
+    w.memo = {}
+    for name, cols in {**INFRA, "all_infrastructure": [c for v in INFRA.values() for c in v]}.items():
+        sub = w.tr.loc[~w.tr[cols].any(axis=1), SLIM]
+        for r in RULES:
+            fp = score.evaluate(rule_links(w, sub, r, exch, drop_aa="aa_infra" in cols)[0], lab)["cross_exchange_pairs_linked"]
+            base = rows[r]["false_pairs"]
+            rows[r][f"false_pairs_without_{name}"] = fp
+            rows[r][f"share_caused_by_{name}"] = (base - fp) / base if base else float("nan")
+        del sub
+        log("infra", name, {r: rows[r][f"false_pairs_without_{name}"] for r in RULES})
+    return pd.DataFrame(rows.values())
 
 
 def taint_results(w, seed_sets, labels):
@@ -222,6 +225,7 @@ def main():
     ap.add_argument("--splits", type=int, default=10)
     ap.add_argument("--bootstrap", type=int, default=200)
     ap.add_argument("--days", nargs="*", type=int, default=[26316189, 26323365, 26330541, 26337723])
+    ap.add_argument("--force", action="store_true", help="recompute stages whose results already exist")
     a = ap.parse_args()
     os.makedirs("results", exist_ok=True)
     tag = a.chain
@@ -243,16 +247,20 @@ def main():
              **{f"flagged_{c}": int(w.tr[c].sum()) for c in ["poison_zero", "poison_lookalike", "sweeper", "aa_infra", "infra_any"]}}
     json.dump(stats, open(f"results/stats_{tag}.json", "w"), indent=2)
     log(stats)
-    evaluate_rules(w, labels, a.splits, sizes_out=f"results/cluster_sizes_{tag}.csv").to_csv(f"results/rules_{tag}.csv", index=False)
-    infra_attribution(w, labels).to_csv(f"results/infra_{tag}.csv", index=False)
-    t, hc = taint_results(w, {"ofac_sdn": sources, "sweeperhunter_collectors": collectors}, labels)
-    t.to_csv(f"results/taint_{tag}.csv", index=False)
-    json.dump(hc, open(f"results/haircut_{tag}.json", "w"), indent=2)
-    if a.bootstrap:
+    todo = lambda f: a.force or not os.path.exists(f)  # noqa: E731  each stage resumes if its output exists
+    if todo(f"results/rules_{tag}.csv"):
+        evaluate_rules(w, labels, a.splits, sizes_out=f"results/cluster_sizes_{tag}.csv").to_csv(f"results/rules_{tag}.csv", index=False)
+    if todo(f"results/infra_{tag}.csv"):
+        infra_attribution(w, labels).to_csv(f"results/infra_{tag}.csv", index=False)
+    if todo(f"results/taint_{tag}.csv"):
+        t, hc = taint_results(w, {"ofac_sdn": sources, "sweeperhunter_collectors": collectors}, labels)
+        t.to_csv(f"results/taint_{tag}.csv", index=False)
+        json.dump(hc, open(f"results/haircut_{tag}.json", "w"), indent=2)
+    if a.bootstrap and todo(f"results/bootstrap_{tag}.csv"):
         pd.concat([block_bootstrap(w, labels, rule=r, B=b).assign(rule=r)
                    for r, b in (("dar_naive", a.bootstrap), ("cospend", max(1, a.bootstrap // 2)))]
                   ).to_csv(f"results/bootstrap_{tag}.csv", index=False)
-    if a.chain == "eth" and not a.blocks:
+    if a.chain == "eth" and not a.blocks and todo(f"results/per_day_{tag}.csv"):
         pd.concat([per_day(w, labels, r, a.days) for r in ("dar_naive", "dar_victor", "all")]).to_csv(f"results/per_day_{tag}.csv", index=False)
     hc, hs = handcheck.run(w, labels)
     hc.to_csv(f"results/handcheck_{tag}.csv", index=False)
