@@ -48,5 +48,70 @@
    "label": "Injected tests",
    "alt": "False links made by each rule on wallets I control on a local fork"
   }
+ ],
+ "viz": [
+  {
+   "title": "Pairs of addresses from two different exchanges wrongly merged",
+   "unit": "count",
+   "bars": [
+    {
+     "label": "Deposit reuse, naive",
+     "value": 198,
+     "tone": "bad"
+    },
+    {
+     "label": "Deposit reuse, Victor 2020",
+     "value": 0,
+     "tone": "good"
+    },
+    {
+     "label": "Same sender in one tx",
+     "value": 359,
+     "tone": "bad"
+    },
+    {
+     "label": "All rules combined",
+     "value": 449,
+     "tone": "bad"
+    }
+   ]
+  },
+  {
+   "title": "Share of those false merges caused by poisoning or other infrastructure",
+   "unit": "%",
+   "bars": [
+    {
+     "label": "Deposit reuse, naive",
+     "value": 0.0,
+     "tone": "neutral"
+    },
+    {
+     "label": "Same sender in one tx",
+     "value": 60.2,
+     "tone": "warn"
+    },
+    {
+     "label": "All rules combined",
+     "value": 51.4,
+     "tone": "warn"
+    }
+   ]
+  },
+  {
+   "title": "Addresses a one-hop taint rule flags, with and without zero-value transfers",
+   "unit": "count",
+   "bars": [
+    {
+     "label": "All transfers",
+     "value": 147611,
+     "tone": "bad"
+    },
+    {
+     "label": "Zero-value removed",
+     "value": 23812,
+     "tone": "good"
+    }
+   ]
+  }
  ]
 }

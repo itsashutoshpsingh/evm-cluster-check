@@ -6,9 +6,9 @@ BASE_START = 53350927
 BASE_END   = 53361726
 SWEEP = https://raw.githubusercontent.com/liziwei1/SweeperHunter/b623678970ef6aa2e61c27720a9da9c58267fea2/dataset
 
-.PHONY: all setup inputs fetch run injected figures notebook test
+.PHONY: all setup inputs fetch run injected figures summary notebook test
 
-all: setup inputs fetch run injected figures notebook
+all: setup inputs fetch run injected figures summary notebook
 
 setup:
 	python3 -m venv .venv && $(PY) -m pip install -r requirements.txt
@@ -43,3 +43,6 @@ notebook:
 
 test:
 	$(PY) -m pytest -q tests
+
+summary:  ## results/summary.json for the project site
+	$(PY) -m src.summary
