@@ -1,5 +1,8 @@
 # evm-cluster-check
 
+[![tests](https://github.com/itsashutoshpsingh/evm-cluster-check/actions/workflows/ci.yml/badge.svg)](https://github.com/itsashutoshpsingh/evm-cluster-check/actions/workflows/ci.yml)
+![licence](https://img.shields.io/badge/licence-MIT-00e5a0)
+
 **On 3 days of Ethereum data (1 to 3 November 2026, 5.44 million transactions), the naive deposit-address-reuse rule merged 198 pairs of addresses that belong to two different exchanges. 0% of those false merges came through poisoning transfers, sweeper contracts or shared fee-paying services: every one runs through a high-volume hub address, and all 198 disappear when the 366 hubs are excluded. The same-sender-in-transaction rule merged 359 such pairs, and 60% of those came only through poisoning transfers.**
 
 | Rule (hubs included) | Addresses clustered | Labelled pairs linked | Known-wrong links | Wrong links caused by infrastructure |
