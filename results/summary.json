@@ -3,19 +3,19 @@
  "headline": "On 3 days of Ethereum (5.44M transactions), naive deposit-address reuse merged 198 pairs of addresses from two different exchanges, none caused by poisoning, sweepers or fee services; the same-sender rule merged 359, and 60% of those came only through poisoning transfers.",
  "metrics": [
   {
-   "label": "cross-exchange false merges, deposit-address reuse",
+   "label": "Cross-exchange false merges, deposit-address reuse",
    "value": 198
   },
   {
-   "label": "of those caused by infrastructure",
+   "label": "Share of deposit-reuse false merges caused by infrastructure",
    "value": "0%"
   },
   {
-   "label": "cross-exchange false merges, same sender in one tx",
+   "label": "Cross-exchange false merges, same sender in one tx",
    "value": 359
   },
   {
-   "label": "of those caused by poisoning",
+   "label": "Share of same-sender false merges caused by poisoning",
    "value": "60%"
   },
   {
@@ -23,7 +23,7 @@
    "value": "5,440,040"
   },
   {
-   "label": "exchange PoR addresses as ground truth",
+   "label": "Exchange PoR addresses as ground truth",
    "value": 452
   }
  ],
@@ -51,7 +51,7 @@
  ],
  "viz": [
   {
-   "title": "Pairs of addresses from two different exchanges wrongly merged",
+   "title": "Naive deposit reuse and the same-sender rule wrongly merge addresses of two different exchanges",
    "unit": "count",
    "bars": [
     {
@@ -77,7 +77,7 @@
    ]
   },
   {
-   "title": "Share of those false merges caused by poisoning or other infrastructure",
+   "title": "Poisoning and other infrastructure cause most same-sender false merges and none from deposit reuse",
    "unit": "%",
    "bars": [
     {
@@ -98,7 +98,7 @@
    ]
   },
   {
-   "title": "Addresses a one-hop taint rule flags, with and without zero-value transfers",
+   "title": "Zero-value transfers inflate the addresses a one-hop taint rule flags",
    "unit": "count",
    "bars": [
     {

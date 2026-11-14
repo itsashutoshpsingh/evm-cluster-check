@@ -22,12 +22,12 @@ def build():
                      f"{dar} pairs of addresses from two different exchanges, none caused by poisoning, sweepers or fee services; "
                      f"the same-sender rule merged {co}, and {co_poison:.0%} of those came only through poisoning transfers."),
         "metrics": [
-            {"label": "cross-exchange false merges, deposit-address reuse", "value": dar},
-            {"label": "of those caused by infrastructure", "value": f"{infra.loc['dar_naive'].share_caused_by_all_infrastructure:.0%}"},
-            {"label": "cross-exchange false merges, same sender in one tx", "value": co},
-            {"label": "of those caused by poisoning", "value": f"{co_poison:.0%}"},
+            {"label": "Cross-exchange false merges, deposit-address reuse", "value": dar},
+            {"label": "Share of deposit-reuse false merges caused by infrastructure", "value": f"{infra.loc['dar_naive'].share_caused_by_all_infrastructure:.0%}"},
+            {"label": "Cross-exchange false merges, same sender in one tx", "value": co},
+            {"label": "Share of same-sender false merges caused by poisoning", "value": f"{co_poison:.0%}"},
             {"label": "Ethereum transactions analysed", "value": f"{stats['transactions']:,}"},
-            {"label": "exchange PoR addresses as ground truth", "value": stats["por_labels"]},
+            {"label": "Exchange PoR addresses as ground truth", "value": stats["por_labels"]},
         ],
         "charts": [
             {"path": "docs/img/false_merges_by_rule_eth.png", "label": "False merges by rule",
@@ -38,16 +38,16 @@ def build():
             {"path": "docs/img/injected.png", "label": "Injected tests", "alt": "False links made by each rule on wallets I control on a local fork"},
         ],
         "viz": [
-            {"title": "Pairs of addresses from two different exchanges wrongly merged", "unit": "count", "bars": [
+            {"title": "Naive deposit reuse and the same-sender rule wrongly merge addresses of two different exchanges", "unit": "count", "bars": [
                 {"label": "Deposit reuse, naive", "value": dar, "tone": "bad"},
                 {"label": "Deposit reuse, Victor 2020", "value": int(rules.loc["dar_victor"].pairs_false_linked), "tone": "good"},
                 {"label": "Same sender in one tx", "value": co, "tone": "bad"},
                 {"label": "All rules combined", "value": comb, "tone": "bad"}]},
-            {"title": "Share of those false merges caused by poisoning or other infrastructure", "unit": "%", "bars": [
+            {"title": "Poisoning and other infrastructure cause most same-sender false merges and none from deposit reuse", "unit": "%", "bars": [
                 {"label": "Deposit reuse, naive", "value": infra_pct("dar_naive"), "tone": "neutral"},
                 {"label": "Same sender in one tx", "value": infra_pct("cospend"), "tone": "warn"},
                 {"label": "All rules combined", "value": infra_pct("all"), "tone": "warn"}]},
-            {"title": "Addresses a one-hop taint rule flags, with and without zero-value transfers", "unit": "count", "bars": [
+            {"title": "Zero-value transfers inflate the addresses a one-hop taint rule flags", "unit": "count", "bars": [
                 {"label": "All transfers", "value": int(t["all_transfers"]), "tone": "bad"},
                 {"label": "Zero-value removed", "value": int(t["no_zero_value"]), "tone": "good"}]},
         ],
